@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#1f4e5a">
+<title>BLC COSH Register</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: phone first. Sticky emergency bar, site header, then a scannable list of products that open in place. */
+:root{
+  --bg:#f3f5f5; --surface:#ffffff; --ink:#18282c; --muted:#5b6b6f; --line:#d8e0e1;
+  --accent:#1f4e5a; --accent-ink:#ffffff; --accent-soft:#e3eef0;
+  --danger:#b3261e; --danger-soft:#fbe6e4; --warn:#9a6200; --warn-soft:#fdf0d5; --ok:#2e6b3a; --ok-soft:#e1f1e3;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif; --body:"Source Sans 3","Segoe UI",Arial,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1719; --surface:#172225; --ink:#e6eeef; --muted:#9db0b3; --line:#2a3a3e;
+  --accent:#5fa8b8; --accent-ink:#0b1416; --accent-soft:#1d3237;
+  --danger:#ff8a80; --danger-soft:#3a1d1b; --warn:#f2c065; --warn-soft:#3a2e15; --ok:#8fd19c; --ok-soft:#18301d; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0f1719; --surface:#172225; --ink:#e6eeef; --muted:#9db0b3; --line:#2a3a3e;
+  --accent:#5fa8b8; --accent-ink:#0b1416; --accent-soft:#1d3237;
+  --danger:#ff8a80; --danger-soft:#3a1d1b; --warn:#f2c065; --warn-soft:#3a2e15; --ok:#8fd19c; --ok-soft:#18301d; color-scheme:dark;}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.45 var(--body)}
+a{color:var(--accent)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px}
+.sos{position:sticky;top:0;z-index:5;background:var(--danger);color:#fff;font-weight:600;font-size:14px}
+.sos .wrap{display:flex;gap:12px;justify-content:space-between;align-items:center;padding-top:8px;padding-bottom:8px;flex-wrap:wrap}
+.sos b{font-family:var(--display);font-size:18px;letter-spacing:.02em}
+header{background:var(--accent);color:var(--accent-ink)}
+header .wrap{padding-top:18px;padding-bottom:16px;display:grid;gap:10px}
+.brand{font-family:var(--display);font-size:13px;letter-spacing:.12em;text-transform:uppercase;opacity:.85}
+h1{font-family:var(--display);font-weight:700;font-size:34px;line-height:1;margin:0;text-wrap:balance}
+.sitesw{display:flex;gap:8px;flex-wrap:wrap}
+.sitesw a{color:var(--accent-ink);text-decoration:none;border:1.5px solid currentColor;border-radius:999px;padding:5px 14px;font-weight:600;font-size:15px;opacity:.8}
+.sitesw a[aria-current="page"]{background:var(--accent-ink);color:var(--accent);opacity:1}
+nav.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);background:var(--surface);position:sticky;top:38px;z-index:4}
+nav.tabs .wrap{display:flex;gap:4px;width:100%}
+nav.tabs a{padding:12px 12px 10px;text-decoration:none;color:var(--muted);font-weight:600;border-bottom:3px solid transparent}
+nav.tabs a[aria-current="page"]{color:var(--ink);border-color:var(--accent)}
+main{padding:16px 0 60px}
+main .wrap{display:grid;gap:16px}
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.tile .num{font-family:var(--display);font-size:30px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.tile .lbl{font-size:13px;color:var(--muted)}
+.tile.bad .num{color:var(--danger)} .tile.mid .num{color:var(--warn)}
+.search{display:grid;gap:8px}
+.search input{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:14px;font-weight:600;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.list{display:grid;gap:8px}
+.prod{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;border-left:6px solid var(--line)}
+.prod.sw-DANGER{border-left-color:var(--danger)} .prod.sw-WARNING{border-left-color:var(--warn)}
+.prod > button.head{display:grid;grid-template-columns:1fr auto;gap:4px 10px;width:100%;text-align:left;background:none;border:0;padding:12px 14px;cursor:pointer}
+.prod .pname{font-weight:700;font-size:17px;line-height:1.25}
+.prod .puse{color:var(--muted);font-size:14px;grid-column:1}
+.prod .ploc{font-size:14px;grid-column:1}
+.prod .ploc.unk{color:var(--muted);font-style:italic}
+.pills{display:flex;gap:6px;flex-wrap:wrap;grid-column:1/-1}
+.pill{font-size:12px;font-weight:700;letter-spacing:.03em;border-radius:6px;padding:2px 8px;text-transform:uppercase;background:var(--accent-soft);color:var(--ink)}
+.pill.d{background:var(--danger);color:#fff} .pill.w{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--danger-soft);color:var(--danger)} .pill.mid{background:var(--warn-soft);color:var(--warn)} .pill.good{background:var(--ok-soft);color:var(--ok)}
+.chev{grid-row:1;grid-column:2;color:var(--muted);font-size:20px;transition:transform .15s}
+.prod.open .chev{transform:rotate(90deg)}
+.detail{display:none;padding:0 14px 14px;gap:12px}
+.prod.open .detail{display:grid}
+.box{border-radius:10px;padding:10px 12px;background:var(--bg)}
+.box h3{margin:0 0 4px;font-family:var(--display);font-size:17px;letter-spacing:.04em;text-transform:uppercase}
+.box p{margin:0}
+.box.fa{background:var(--danger-soft)} .box.fa h3{color:var(--danger)}
+.box.ppe{background:var(--accent-soft)}
+.box.mix{background:var(--warn-soft)} .box.mix h3{color:var(--warn)}
+.kv{display:grid;grid-template-columns:max-content 1fr;gap:4px 12px;font-size:14px}
+.kv dt{color:var(--muted)} .kv dd{margin:0}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:var(--accent-ink);border:0;border-radius:10px;padding:10px 16px;font-weight:700;text-decoration:none;cursor:pointer}
+.btn.ghost{background:var(--surface);color:var(--accent);border:1.5px solid var(--accent)}
+.btn:disabled{opacity:.5;cursor:default}
+.note{font-size:14px;color:var(--muted)}
+.banner{border-radius:10px;padding:12px 14px;background:var(--warn-soft);color:var(--ink);border:1px solid var(--line)}
+.banner.info{background:var(--accent-soft)}
+h2{font-family:var(--display);font-size:24px;margin:8px 0 0;letter-spacing:.02em}
+.mixlist{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.mixlist li{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--danger);border-radius:10px;padding:10px 12px}
+.mixlist li.apart{border-left-color:var(--warn)}
+/* site check */
+.progress{height:10px;background:var(--line);border-radius:999px;overflow:hidden}
+.progress span{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+.ck{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:10px;border-left:6px solid var(--line)}
+.ck.done{border-left-color:var(--ok)} .ck.no{border-left-color:var(--muted)}
+.ck .top{display:flex;justify-content:space-between;gap:10px;align-items:start}
+.ck .top b{font-size:16px;line-height:1.25}
+.seg{display:inline-flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:8px 12px;font-weight:600;cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fields .full{grid-column:1/-1}
+label.f{display:grid;gap:3px;font-size:13px;color:var(--muted);font-weight:600}
+label.f input,label.f textarea,label.f select{padding:9px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-weight:400;font-size:16px}
+.qrow{display:flex;justify-content:space-between;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.qrow span{font-size:15px}
+.saved{font-size:12px;color:var(--ok);font-weight:600;min-height:1em}
+.saved.err{color:var(--danger)}
+.thumb{max-width:120px;border-radius:8px;border:1px solid var(--line)}
+.pick{display:grid;gap:12px}
+.pick a{display:block;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;text-decoration:none;color:var(--ink)}
+.pick a b{font-family:var(--display);font-size:26px}
+details summary{cursor:pointer}
+footer{font-size:13px;color:var(--muted);padding:20px 0 40px}
+@media (max-width:420px){.fields{grid-template-columns:1fr} h1{font-size:30px} .summary .tile .num{font-size:26px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="sos" role="note"><div class="wrap"><span>Emergency <b>111</b></span><span>Poisons Centre <b>0800 764 766</b></span></div></div>
+<header><div class="wrap">
+  <div class="brand">Big Little Campers · Hazardous substances</div>
+  <h1 id="title">COSH Register</h1>
+  <div class="sitesw" id="sitesw"></div>
+</div></header>
+<nav class="tabs" id="tabs" aria-label="Sections"><div class="wrap" id="tabsin"></div></nav>
+<main><div class="wrap" id="view"></div></main>
+<div class="wrap"><footer>Hazard, PPE, storage and first aid details are taken from each manufacturer's Safety Data Sheet. Items marked TBC are waiting on the supplier's SDS. The printed SDS folder at each depot is the backup if your phone can't load this page. Big Little Campers Ltd, Auckland and Christchurch.</footer></div>
+
+<script>
+const PRODUCTS = [{"n": 1, "name": "Pacer Window Cleaner (sold as Streak Free Window Cleaner)", "supplier": "Car Clean Products NZ Ltd (Pacer), 33 Ha Crescent, Wiri, Auckland", "phone": "09 250 0091", "codes": "WC05 / WC4 / WC20", "use": "Glass, mirrors and windscreens", "sds": "2026-08", "hsno": "HSR002530 Cleaning Products (Subsidiary Hazard) GS 2020", "ghs": "Eye irritation Cat 2A", "signal": "WARNING", "h": "H319", "ingredients": "Isopropanol 5 to 10%, oxygenated solvent 5 to 15%", "ppe": "Safety glasses and protective gloves", "storage": "Cool, dry, ventilated, out of sun, protect from freezing. Keep from strong oxidisers, acids and alkalis", "transport": "Not dangerous goods", "firstaid": "Eyes: rinse with water for several minutes, seek advice if irritation persists", "link": "https://d347awuzx0kdse.cloudfront.net/pacer/product-download/wc4-sds.pdf?v=5da46d43ae6f0c02a45efcc1cb14e6bb6215f189", "notes": null, "tags": [], "askBrand": false}, {"n": 2, "name": "Pacer Vision X Windscreen Washer Additive", "supplier": "Car Clean Products NZ Ltd (Pacer), 33 Ha Crescent, Wiri, Auckland", "phone": "09 250 0091", "codes": "WWA05 / WWA4 / WWA20", "use": "Windscreen washer reservoirs (dilute 1:30)", "sds": "2024-06", "hsno": "HSR002530 Cleaning Products (Subsidiary Hazard) GS 2020", "ghs": "Skin irritation Cat 2; Eye irritation Cat 2; Aquatic chronic Cat 4", "signal": "WARNING", "h": "H315, H319, H413", "ingredients": "Aqueous ammonia <5%, glycol ether <5%, traces of formaldehyde <1%", "ppe": "None for normal label use. Goggles, PVC gloves and boots for bulk decanting", "storage": "Away from heat, sun and food. Keep closed. Incompatible with strong acids", "transport": "Not dangerous goods", "firstaid": "Eyes and skin: rinse well with water", "link": "https://d347awuzx0kdse.cloudfront.net/pacer/product-download/wwa4-sds.pdf?v=b94ce5f3698a4bded87a3d3797b218ff7c89ff0c", "notes": "Contains ammonia: never mix with bleach", "tags": ["ammonia"], "askBrand": false}, {"n": 3, "name": "Pacer Velour & Fabric Cleaner", "supplier": "Car Clean Products NZ Ltd (Pacer), 33 Ha Crescent, Wiri, Auckland", "phone": "09 250 0091", "codes": "VFC4", "use": "Upholstery and carpet cleaning", "sds": "2026-05", "hsno": "HSR002530 Cleaning Products (Subsidiary Hazard) GS 2020", "ghs": "Serious eye damage Cat 1; Aquatic acute Cat 2; Harmful to terrestrial vertebrates", "signal": "DANGER", "h": "H318, H401, H433", "ingredients": "Amphoteric surfactant <10%, 2-butoxyethanol <5%, formaldehyde <1%", "ppe": "Gloves, tight fitting safety goggles and face shield", "storage": "Incompatible with acids, alkalis, caustics, halogens", "transport": "Not dangerous goods", "firstaid": "Eyes: rinse immediately for 15 min and get medical help (risk of serious eye damage)", "link": "https://d347awuzx0kdse.cloudfront.net/pacer/product-download/vfc4-sds.pdf", "notes": null, "tags": [], "askBrand": false}, {"n": 4, "name": "Pacer Grapewash Car Wash & Shine", "supplier": "Car Clean Products NZ Ltd (Pacer), 33 Ha Crescent, Wiri, Auckland", "phone": "09 250 0091", "codes": "GX4 / GX20", "use": "Hand washing vehicles (1:40)", "sds": "2024-11", "hsno": "HSR002530 Cleaning Products (Subsidiary Hazard) GS 2020", "ghs": "Skin irritation Cat 2; Eye irritation Cat 2", "signal": "WARNING", "h": "H315, H319", "ingredients": "Alkylbenzene sulphonic acid <25%, sodium hydroxide <5%", "ppe": "Not needed in normal use. Gloves and goggles for bulk handling", "storage": "Incompatible with strong oxidisers and acids", "transport": "Not dangerous goods", "firstaid": "Eyes and skin: rinse well with water", "link": "https://d347awuzx0kdse.cloudfront.net/pacer/product-download/gx4-sds.pdf?v=32c8cd7f7401e0b51da017f754cdbcda42f73d66", "notes": null, "tags": [], "askBrand": false}, {"n": 5, "name": "Pacer Restorall Interior Dressing", "supplier": "Car Clean Products NZ Ltd (Pacer), 33 Ha Crescent, Wiri, Auckland", "phone": "09 250 0091", "codes": "RALL05 / RALL4 / RALL20", "use": "Dashboards, vinyl and plastic trim", "sds": "2024-06", "hsno": "Not applicable (not hazardous)", "ghs": "Not classified as hazardous", "signal": "None", "h": "None", "ingredients": "None hazardous", "ppe": "PVC gloves and goggles for bulk handling or if splashing likely", "storage": "Incompatible with strong acids and alkalis", "transport": "Not dangerous goods", "firstaid": "General: rinse with water", "link": "https://d347awuzx0kdse.cloudfront.net/pacer/product-download/rall4-sds.pdf?v=5a06da3290d509418c4e26433f2880c5ef010cc9", "notes": "Not hazardous, but keep on the register as it is stored and used", "tags": [], "askBrand": false}, {"n": 6, "name": "Pacer Chemical Toilet Solution", "supplier": "Car Clean Products NZ Ltd (Pacer), 33 Ha Crescent, Wiri, Auckland", "phone": "09 250 0091", "codes": "CTS4", "use": "Cassette toilet holding tanks (100 ml per 20 L)", "sds": "2026-05", "hsno": "HSR002681 Water Treatment Chemicals (Corrosive) GS 2020", "ghs": "Acute oral toxicity Cat 4; Skin corrosion Cat 1B; Serious eye damage Cat 1; Aquatic chronic Cat 2", "signal": "DANGER", "h": "H302, H314, H318, H411", "ingredients": "Alkylamine biocide <10%, benzoic acid <5%, lactic acid <2%", "ppe": "Nitrile gloves, goggles with face shield, protective clothing", "storage": "Store locked up, away from food, heat and flames. Incompatible with acids, strong oxidisers, strong bases", "transport": "UN 3267, Class 8 (corrosive), PG II", "firstaid": "Eyes: flush 15 min, call a doctor immediately. Skin: remove clothing, wash, seek medical attention. Swallowed: rinse mouth, do NOT induce vomiting", "link": "https://d347awuzx0kdse.cloudfront.net/pacer/product-download/cts4-sds.pdf?v=0f76f23e260ebad43cda95cd35efdcf8ec637fa0", "notes": "Corrosive. Consider whether guests are given neat product or pre-dosed cassettes; ecotoxic, never tip neat product down drains", "tags": ["corrosive", "lock"], "askBrand": false}, {"n": 7, "name": "Pacer Multi Purpose Cleaner", "supplier": "Car Clean Products NZ Ltd (Pacer), 33 Ha Crescent, Wiri, Auckland", "phone": "09 250 0091", "codes": "MPC4 / MPC20", "use": "General cleaning (1:2 to 1:20)", "sds": "2026-07", "hsno": "HSR002530 Cleaning Products (Subsidiary Hazard) GS 2020", "ghs": "Skin irritation Cat 2; Eye irritation Cat 2A; Aquatic chronic Cat 3", "signal": "WARNING", "h": "H315, H319, H412", "ingredients": "Sodium metasilicate 1 to 5%, 2-butoxyethanol 1 to 5%, phosphates 1 to 5% each", "ppe": "Protective gloves and safety glasses or goggles; respiratory protection if misting", "storage": "Incompatible with strong acids and strong oxidisers", "transport": "Not dangerous goods", "firstaid": "Eyes and skin: rinse well with water, seek advice if irritation persists", "link": "https://d347awuzx0kdse.cloudfront.net/pacer/product-download/mpc4-sds.pdf?v=3629b3a8265029ae2e4c74cb6c20d9fe0fe707b0", "notes": null, "tags": [], "askBrand": false}, {"n": 8, "name": "Pacer Tyre Dressing Non-Silicone (CHECK which tyre dressing you use)", "supplier": "Car Clean Products NZ Ltd (Pacer), 33 Ha Crescent, Wiri, Auckland", "phone": "09 250 0091", "codes": "TDNS4 / TDNS20", "use": "Tyres and exterior plastics", "sds": "2024-10", "hsno": "HSR002657 Surface Coatings and Colourants (Combustible) GS 2020", "ghs": "Flammable liquid Cat 4; STOT repeated exposure Cat 2; Aquatic chronic Cat 4; Harmful to terrestrial vertebrates", "signal": "WARNING", "h": "H227, H373, H413", "ingredients": "Glycerine >25%, ethanol <20%, formaldehyde <1%", "ppe": "Goggles and gloves advised", "storage": "Combustible: keep from heat. Incompatible with strong oxidisers, acids, alkalis", "transport": "Not dangerous goods", "firstaid": "Eyes and skin: rinse with water", "link": "https://d347awuzx0kdse.cloudfront.net/pacer/product-download/tdns4-sds.pdf?v=ff026c971be681037a51f96af1d37a023902d9d8", "notes": "Pacer sells two tyre dressings. Keep whichever row matches your drum and delete the other", "tags": ["combustible"], "askBrand": true}, {"n": 9, "name": "Pacer Tyre Dressing Silicone Spray Gloss (CHECK which tyre dressing you use)", "supplier": "Car Clean Products NZ Ltd (Pacer), 33 Ha Crescent, Wiri, Auckland", "phone": "09 250 0091", "codes": "TD20", "use": "Tyres and exterior plastics", "sds": "2026-09", "hsno": "HSR002662 Surface Coatings and Colourants (Flammable) GS 2020", "ghs": "Flammable liquid Cat 2; Aspiration Cat 1; Skin irritation Cat 2; STOT SE Cat 3 (drowsiness); STOT RE Cat 2; Aquatic chronic Cat 2", "signal": "DANGER", "h": "H225, H304, H315, H336, H373, H411", "ingredients": "Light petroleum naphtha >50%, silicone fluid >10%", "ppe": "Safety glasses or goggles, chemical resistant gloves, protective clothing; organic vapour respirator if poorly ventilated", "storage": "Highly flammable: flammable store, away from ignition sources. Incompatible with strong oxidisers", "transport": "UN 3295, Class 3 (flammable liquid), PG II", "firstaid": "Swallowed: get emergency medical help, do NOT induce vomiting. Skin: wash with soap and water", "link": "https://d347awuzx0kdse.cloudfront.net/pacer/product-download/td20-sds.pdf", "notes": "Highest risk product on the list if this is the one you use. Use outdoors or well ventilated only", "tags": ["flammable"], "askBrand": true}, {"n": 10, "name": "Green Rhino Internal Pipeline Cleaner (the 'Green Tino' degreaser)", "supplier": "Car Clean Products NZ Ltd (Green Rhino brand, made by Pacer)", "phone": "09 250 0091", "codes": "GRK16-5 / GRK16-20", "use": "Grey water and sink drain lines", "sds": "2024-07", "hsno": "HSR002526 Cleaning Products (Corrosive) GS 2020", "ghs": "Acute dermal toxicity Cat 4; Corrosive to metals Cat 1; Skin corrosion Cat 1B; Serious eye damage Cat 1; Aquatic chronic Cat 4", "signal": "DANGER", "h": "H312, H290, H314, H318, H413", "ingredients": "Sodium hydroxide (caustic soda) <40%", "ppe": "Safety goggles, rubber gloves, boots and alkali resistant clothing (required)", "storage": "Store locked up in corrosion resistant container. Reacts violently with acids", "transport": "UN 1719, Class 8 (corrosive), PG III (confirm on SDS)", "firstaid": "Eyes: flush 15 min, urgent medical help. Skin: remove clothing, rinse thoroughly. Swallowed: extremely hazardous, rinse mouth, do NOT induce vomiting, call 0800 764 766", "link": "https://d347awuzx0kdse.cloudfront.net/pacer/product-download/grk16-5-sds.pdf?v=2f671ffb9b71843c9518bed5507fd73a28a75630", "notes": "Strong caustic. Never mix with acidic products. Staff only, never left in vans", "tags": ["corrosive", "caustic", "lock"], "askBrand": false}, {"n": 11, "name": "Stimex Camp Flush", "supplier": "Stimex Nederland BV; NZ distributor CalPro (Caravan & Leisure Products), 9F Airborne Rd, Auckland", "phone": "09 280 3779", "codes": "CHEMPROBFLUSH (1 L)", "use": "Cassette toilet flush tank (80 ml per 15 L)", "sds": null, "hsno": "TBC from SDS", "ghs": "TBC from SDS", "signal": "TBC", "h": "TBC", "ingredients": "TBC", "ppe": "TBC", "storage": "TBC", "transport": "TBC", "firstaid": "TBC", "link": "https://calpro.co.nz/stimex-camp-flush-1l-pink/", "notes": "No SDS published online. Request the NZ SDS from CalPro", "tags": [], "askBrand": false}, {"n": 12, "name": "Pour n' Go Water Tank Treatment / RV & Marine", "supplier": "Pour n' Go NZ (sold via Farmlands, Marine Deals)", "phone": "TBC", "codes": "Tank treatment 2 L or RV & Marine 1 L", "use": "Fresh water tank disinfection", "sds": null, "hsno": "TBC from SDS", "ghs": "Manufacturer data lists it as an eye irritant (old Xi / R36 system)", "signal": "TBC", "h": "TBC", "ingredients": "Hydrogen peroxide up to 7.5% (tank) or up to 1.5% (RV & Marine), silver 0.012%", "ppe": "Protect eyes and avoid skin contact (manufacturer data)", "storage": "Store in original vented container, upright, 5 to 25 C, out of direct sun", "transport": "TBC", "firstaid": "TBC", "link": "http://pourngo.co.nz/technicaldata.html", "notes": "No SDS published online. Request from Pour n' Go and confirm which strength you stock", "tags": [], "askBrand": true}, {"n": 13, "name": "CRC 5-56 Multipurpose Aerosol (ASSUMED, check your can)", "supplier": "CRC Industries New Zealand, 10 Highbrook Drive, East Tamaki, Auckland", "phone": "09 272 2700", "codes": "5-56 aerosol", "use": "Lubricant and moisture displacer", "sds": "2020-03", "hsno": "HSR002515 Aerosols (Flammable) GS 2017", "ghs": "Flammable aerosol Cat 1; Acute oral Cat 5; Skin irritation Cat 3; STOT SE Cat 3 (narcotic); Aspiration Cat 1", "signal": "DANGER", "h": "H222, H303, H316, H336, H304", "ingredients": "Petroleum hydrocarbons >60%, LPG propellant", "ppe": "Safety glasses, gloves, overalls; AX-P respirator if poorly ventilated", "storage": "Approved flammable store, below 50 C, away from sun and ignition. Incompatible with oxidisers incl. chlorine bleach", "transport": "UN 1950 Aerosols, Class 2.1", "firstaid": "Swallowed: do NOT induce vomiting, call 0800 764 766. Inhaled: fresh air", "link": "https://twlnz.co.nz/product_images/d365/CRC1751837/CRC_556_Aerosol_SDS.pdf", "notes": "SDS found is March 2020 and over 5 years old. Get the current one from CRC NZ", "tags": ["flammable"], "askBrand": true}, {"n": 14, "name": "AdBlue (brand TBC)", "supplier": "Example SDS: MEI Group / EcoBlue, Christchurch (replace with your supplier)", "phone": "0800 310 340", "codes": "TBC", "use": "Diesel exhaust fluid for fleet", "sds": "2019-04", "hsno": "HSR002503 Additives, Process Chemicals and Raw Materials (Subsidiary Hazard) GS", "ghs": "HSNO 6.3B mild skin irritant; 6.4A eye irritant; 9.3C harmful to terrestrial vertebrates", "signal": "WARNING", "h": "H316, H320, H433", "ingredients": "Urea 32.5% in water", "ppe": "Safety glasses, chemical gloves", "storage": "Cool, dry, ventilated, original container. Incompatible with oxidisers and strong acids", "transport": "Not dangerous goods", "firstaid": "Eyes: flush 15 min. Skin: wash with soap and water", "link": "https://wellingtonwater.co.nz/assets/WW-Knowledge-Base-/Safety-Data-Sheets-SDS/Rongotai/AdBlue-SDS-NZ-4.0-17-04-2019.pdf", "notes": "Placeholder SDS, 2019 and from one supplier. Swap for your own supplier's current SDS", "tags": [], "askBrand": true}, {"n": 15, "name": "Cleaning vinegar (brand TBC)", "supplier": "TBC", "phone": "TBC", "codes": "TBC", "use": "General cleaning / descaling", "sds": null, "hsno": "TBC from SDS", "ghs": "TBC from SDS", "signal": "TBC", "h": "TBC", "ingredients": "Acetic acid (strength TBC)", "ppe": "TBC", "storage": "Never store or mix with bleach", "transport": "TBC", "firstaid": "TBC", "link": null, "notes": "Tell me the brand and I'll find its SDS. Mixing with bleach releases chlorine gas", "tags": ["acid"], "askBrand": true}, {"n": 16, "name": "Bleach: Janola Premium (ASSUMED, check your bottle)", "supplier": "Pental Products Pty Ltd, Shepparton VIC (NZ distribution via supermarkets)", "phone": "0800 764 766 (Poisons)", "codes": "Janola Premium Regular", "use": "Disinfecting and stain removal", "sds": "2020-02", "hsno": "HSR002526", "ghs": "HSNO 6.1E acute oral; 8.2C skin corrosive; 8.3A eye corrosive; 9.1C harmful to aquatic life", "signal": "Not stated on SDS", "h": "H303, H314, H318, H412", "ingredients": "Sodium hypochlorite <4.9%, sodium hydroxide <1%", "ppe": "Impervious gloves, safety glasses or goggles, apron for large quantities", "storage": "Cool, dry, ventilated, out of sun, locked up. Reacts with acids to release chlorine gas; keep away from ammonia products", "transport": "Not dangerous goods", "firstaid": "Eyes: flush 15 min, get medical help. Swallowed: rinse mouth, do NOT induce vomiting", "link": "https://image.nxp.nz/nz/pdf/66669973.pdf", "notes": "SDS found is Feb 2020 and over 5 years old. Get the current one", "tags": ["corrosive", "lock", "bleach"], "askBrand": true}];
+// Confirmed storage per site, copied from the register after each site check.
+const CONFIRMED = {};
+const SITES = {auckland:{name:"Auckland (Māngere)", short:"Auckland"}, christchurch:{name:"Christchurch", short:"Christchurch"}};
+const NEVER_MIX = [
+  {a:16,b:15,why:"Bleach with vinegar or any acid releases chlorine gas."},
+  {a:16,b:2,why:"Bleach with Vision X (contains ammonia) releases toxic chloramine gas."},
+  {a:10,b:15,why:"Green Rhino Pipeline Cleaner (caustic) with vinegar or any acid reacts violently and gets hot."}
+];
+const STORE_APART = [
+  {a:6,b:[15,16,10],why:"Chemical Toilet Solution SDS lists acids, strong oxidisers and strong bases as incompatible."},
+  {a:13,b:[16],why:"CRC 5-56 SDS lists oxidisers including chlorine bleach as incompatible."}
+];
+const STORAGE_QS = [
+  "Corrosives (Chemical Toilet Solution, Green Rhino Pipeline Cleaner, bleach) locked up and away from acids",
+  "Bleach kept away from vinegar, acids and Vision X (ammonia)",
+  "Green Rhino (caustic) kept away from vinegar and other acids",
+  "Flammables (CRC aerosols, silicone tyre dressing if used) away from heat, sun and ignition sources",
+  "Every container labelled, nothing decanted into unmarked bottles",
+  "Spill kit, eyewash and gloves / goggles near where chemicals are used",
+  "QR poster up and the printed SDS folder where staff can find it"
+];
+const TAGLABEL = {corrosive:"Corrosive",lock:"Lock up",flammable:"Flammable",combustible:"Combustible",ammonia:"Contains ammonia",caustic:"Caustic",acid:"Acid",bleach:"Bleach"};
+const byN = Object.fromEntries(PRODUCTS.map(p=>[p.n,p]));
+const short = n => byN[n].name.replace(/\s*\(.*?\)\s*/g," ").replace(/^Pacer /,"").trim();
+const esc = s => String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function sdsStatus(p){
+  if(!p.sds) return {t:"SDS needed",c:"bad"};
+  const [y,m] = p.sds.split("-").map(Number);
+  const due = new Date(y+5, m-1, 1), now = new Date();
+  const six = new Date(now); six.setDate(six.getDate()+180);
+  const dueTxt = due.toLocaleDateString("en-NZ",{month:"short",year:"numeric"});
+  if(due < now) return {t:"SDS out of date",c:"bad",due:dueTxt};
+  if(due < six) return {t:"SDS due soon",c:"mid",due:dueTxt};
+  return {t:"SDS current",c:"good",due:dueTxt};
+}
+const sdsDate = p => p.sds ? new Date(p.sds+"-01").toLocaleDateString("en-NZ",{month:"short",year:"numeric"}) : "none";
+
+// ---------- local storage for the site check (this phone only) ----------
+const LS = {
+  get(k,d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } },
+  set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ return false; } }
+};
+let idb=null;
+function openIdb(){ return new Promise(res=>{ try{ const r=indexedDB.open("blc-cosh",1); r.onupgradeneeded=()=>r.result.createObjectStore("photos"); r.onsuccess=()=>{idb=r.result;res(idb)}; r.onerror=()=>res(null);}catch(e){res(null)} }); }
+function idbPut(k,v){ return new Promise(res=>{ if(!idb) return res(false); const t=idb.transaction("photos","readwrite"); t.objectStore("photos").put(v,k); t.oncomplete=()=>res(true); t.onerror=()=>res(false); }); }
+function idbGet(k){ return new Promise(res=>{ if(!idb) return res(null); const r=idb.transaction("photos").objectStore("photos").get(k); r.onsuccess=()=>res(r.result||null); r.onerror=()=>res(null); }); }
+function idbDel(k){ return new Promise(res=>{ if(!idb) return res(); const t=idb.transaction("photos","readwrite"); t.objectStore("photos").delete(k); t.oncomplete=()=>res(); t.onerror=()=>res(); }); }
+const photoMem = {}; // key -> Blob (fallback when IndexedDB is unavailable)
+const photoUrl = {}; // key -> object URL for thumbnails
+
+function blankCheck(){ return {checker:"", items:{}, extras:[], storage:{}, notes:"", startedAt:null, finishedAt:null}; }
+function loadCheck(site){ return Object.assign(blankCheck(), LS.get("blc-check-"+site, {})); }
+
+const state = {site:null, mode:"list", q:"", filter:"all", open:new Set(), check:{}, msg:""};
+let pendingRender=false;
+
+function route(){
+  const h = location.hash.replace("#","");
+  const [s,m] = h.split("-");
+  state.site = SITES[s] ? s : null;
+  state.mode = m==="check" ? "check" : m==="mix" ? "mix" : "list";
+  if(state.site){ state.check[state.site] = state.check[state.site] || loadCheck(state.site); LS.set("blc-site",state.site); }
+  pendingRender=false; render();
+  if(state.mode==="check") loadThumbs();
+}
+window.addEventListener("hashchange",route);
+
+document.addEventListener("focusout",()=>{ if(pendingRender) setTimeout(()=>{ if(!isTyping()){ pendingRender=false; render(); } },0); });
+function isTyping(){ const a=document.activeElement; return a&&a.closest&&a.closest("#view")&&a.matches("input:not(#q):not([type=file]),textarea"); }
+
+function render(){
+  if(isTyping()){ pendingRender=true; return; }
+  const sw = document.getElementById("sitesw"), tabs=document.getElementById("tabsin"), v=document.getElementById("view");
+  document.getElementById("title").textContent = state.site ? `COSH Register · ${SITES[state.site].short}` : "COSH Register";
+  sw.innerHTML = Object.entries(SITES).map(([k,s])=>`<a href="#${k}${state.mode!=="list"?"-"+state.mode:""}" ${k===state.site?'aria-current="page"':""}>${s.short}</a>`).join("");
+  document.getElementById("tabs").style.display = state.site ? "" : "none";
+  if(!state.site){ v.innerHTML = renderPick(); return; }
+  const t = [["list","Register"],["mix","Never mix"],["check","Site check"]];
+  tabs.innerHTML = t.map(([m,l])=>`<a href="#${state.site}${m==="list"?"":"-"+m}" ${m===state.mode?'aria-current="page"':""}>${l}</a>`).join("");
+  v.innerHTML = state.mode==="mix" ? renderMix() : state.mode==="check" ? renderCheck() : renderList();
+  if(state.mode==="list" && state._refocus){ const i=document.getElementById("q"); if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length);} state._refocus=false; }
+}
+
+function renderPick(){
+  const last=LS.get("blc-site",null);
+  return `<p>Which depot are you at?</p><div class="pick">${Object.entries(SITES).map(([k,s])=>`<a href="#${k}"><b>${s.name}</b><div class="note">${k===last?"Last used on this phone":"Open the register for this depot"}</div></a>`).join("")}</div>`;
+}
+
+const conf = n => (CONFIRMED[state.site]||{})[n] || null;
+
+function renderList(){
+  const s=state.site;
+  const nDanger = PRODUCTS.filter(p=>p.signal==="DANGER").length;
+  const nSds = PRODUCTS.filter(p=>sdsStatus(p).c==="bad").length;
+  const nLoc = PRODUCTS.filter(p=>{const c=conf(p.n);return c&&c.location}).length;
+  const lastCheck = (CONFIRMED._checked||{})[s];
+  const q = state.q.trim().toLowerCase();
+  const list = PRODUCTS.filter(p=>{
+    const c=conf(p.n);
+    if(state.filter==="danger" && p.signal!=="DANGER") return false;
+    if(state.filter==="lock" && !p.tags.some(t=>["lock","flammable"].includes(t))) return false;
+    if(state.filter==="sds" && sdsStatus(p).c==="good") return false;
+    if(!q) return true;
+    return [p.name,p.use,p.codes,p.supplier,c&&c.location].join(" ").toLowerCase().includes(q);
+  });
+  const chips=[["all","All"],["danger","Danger"],["lock","Lock up or flammable"],["sds","SDS to sort"]];
+  return `
+  <div class="summary">
+    <div class="tile bad"><div class="num">${nDanger}</div><div class="lbl">Danger products</div></div>
+    <div class="tile ${nSds?"mid":""}"><div class="num">${nSds}</div><div class="lbl">SDS missing or out of date</div></div>
+    <div class="tile"><div class="num">${nLoc}<span style="font-size:18px;color:var(--muted)">/${PRODUCTS.length}</span></div><div class="lbl">Locations confirmed here</div></div>
+  </div>
+  ${lastCheck?`<p class="note">Storage locations confirmed by the site check on ${esc(lastCheck)}.</p>`:`<div class="banner">Storage locations at this depot haven't been confirmed yet. Site lead: tap <a href="#${s}-check">Site check</a> to walk the building.</div>`}
+  <div class="search">
+    <input id="q" type="search" placeholder="Search products, uses or codes" value="${esc(state.q)}" aria-label="Search products">
+    <div class="chips" role="group" aria-label="Filter">${chips.map(([k,l])=>`<button class="chip" data-filter="${k}" aria-pressed="${state.filter===k}">${l}</button>`).join("")}</div>
+  </div>
+  <div class="list">${list.map(renderProd).join("") || `<p class="note">Nothing matches that. Try another word, or clear the filter.</p>`}</div>`;
+}
+
+function renderProd(p){
+  const c=conf(p.n), st=sdsStatus(p), open=state.open.has(p.n);
+  const sig = p.signal==="DANGER"?'<span class="pill d">Danger</span>':p.signal==="WARNING"?'<span class="pill w">Warning</span>':'';
+  const tags = p.tags.map(t=>`<span class="pill">${TAGLABEL[t]}</span>`).join("");
+  let loc;
+  if(c&&c.location) loc=`<span class="ploc">Kept: <b>${esc(c.location)}</b>${c.maxQty?` · max ${esc(c.maxQty)}`:""}</span>`;
+  else if(c&&c.notHeld) loc=`<span class="ploc unk">Not held at this depot</span>`;
+  else loc=`<span class="ploc unk">Storage location not confirmed yet</span>`;
+  const mixes = NEVER_MIX.filter(m=>m.a===p.n||m.b===p.n).map(m=>m.why);
+  const apart = STORE_APART.filter(m=>m.a===p.n||m.b.includes(p.n)).map(m=>m.a===p.n?`Keep away from ${m.b.map(short).join(", ")}. ${m.why}`:`Keep away from ${short(m.a)}. ${m.why}`);
+  const tbc = v => !v || /^TBC/.test(v);
+  return `<article class="prod sw-${esc(p.signal)} ${open?"open":""}">
+  <button class="head" data-toggle="${p.n}" aria-expanded="${open}">
+    <span class="pname">${esc(p.name)}</span><span class="chev" aria-hidden="true">›</span>
+    <span class="puse">${esc(p.use)}</span>
+    ${loc}
+    <span class="pills">${sig}${tags}<span class="pill ${st.c}">${st.t}</span></span>
+  </button>
+  <div class="detail">
+    ${tbc(p.firstaid)&&tbc(p.ppe)?`<div class="banner">We don't have the supplier's SDS for this one yet, so hazard and first aid details are TBC. If someone is hurt, call the Poisons Centre on 0800 764 766 and have the container with you. ${esc(p.notes||"")}</div>`:""}
+    <div class="box fa"><h3>First aid</h3><p>${esc(p.firstaid)}</p></div>
+    <div class="box ppe"><h3>Wear</h3><p>${esc(p.ppe)}</p></div>
+    ${mixes.length||apart.length?`<div class="box mix"><h3>Never mix / keep apart</h3>${mixes.map(x=>`<p><b>${esc(x)}</b></p>`).join("")}${apart.map(x=>`<p>${esc(x)}</p>`).join("")}</div>`:""}
+    <div class="box"><h3>Storage</h3><p>${esc(p.storage)}</p></div>
+    <dl class="kv">
+      <dt>Hazards</dt><dd>${esc(p.ghs)}${p.h&&p.h!=="None"&&p.h!=="TBC"?` (${esc(p.h)})`:""}</dd>
+      <dt>Ingredients</dt><dd>${esc(p.ingredients)}</dd>
+      <dt>Transport</dt><dd>${esc(p.transport)}</dd>
+      <dt>HSNO</dt><dd>${esc(p.hsno)}</dd>
+      <dt>Supplier</dt><dd>${esc(p.supplier)}<br>${esc(p.phone)}</dd>
+      <dt>Codes</dt><dd>${esc(p.codes)}</dd>
+      <dt>SDS</dt><dd>Issued ${sdsDate(p)}${st.due?`, review by ${st.due}`:""}</dd>
+      ${p.notes?`<dt>Notes</dt><dd>${esc(p.notes)}</dd>`:""}
+    </dl>
+    <div class="btnrow">${p.link?`<a class="btn" href="${esc(p.link)}" target="_blank" rel="noopener">Open ${/\.pdf/i.test(p.link)?"full SDS":"supplier page"}</a>`:""}</div>
+  </div></article>`;
+}
+
+function renderMix(){
+  return `<h2>Never mix these</h2>
+  <ul class="mixlist">${NEVER_MIX.map(m=>`<li><b>${esc(short(m.a))} + ${esc(short(m.b))}</b><br>${esc(m.why)}</li>`).join("")}</ul>
+  <h2>Store apart</h2>
+  <ul class="mixlist">${STORE_APART.map(m=>`<li class="apart"><b>${esc(short(m.a))}</b> away from ${esc(m.b.map(short).join(", "))}<br>${esc(m.why)}</li>`).join("")}</ul>
+  <h2>Lock up or keep from heat</h2>
+  <ul class="mixlist">${PRODUCTS.filter(p=>p.tags.includes("lock")).map(p=>`<li><b>${esc(short(p.n))}</b><br>Corrosive. Store locked up, away from acids.</li>`).join("")}
+  ${PRODUCTS.filter(p=>p.tags.includes("flammable")).map(p=>`<li class="apart"><b>${esc(short(p.n))}</b><br>Flammable. Keep away from heat, sun and anything that could spark.</li>`).join("")}</ul>
+  <p class="note">If something has been mixed: get everyone out and into fresh air, call 111, then the Poisons Centre on 0800 764 766.</p>`;
+}
+
+// ---------- site check ----------
+function ck(){ return state.check[state.site]; }
+function persist(){ const c=ck(); if(!c.startedAt) c.startedAt=new Date().toISOString(); if(!LS.set("blc-check-"+state.site,c)) state.msg="This phone won't save as you go (private browsing?). Keep the page open until you've tapped Send."; }
+
+function renderCheck(){
+  const c=ck();
+  const done = PRODUCTS.filter(p=>(c.items[p.n]||{}).found).length;
+  const pct = Math.round(done/PRODUCTS.length*100);
+  return `
+  <div class="banner info"><b>Walk the whole building</b> with this open: wash bay, storeroom, workshop, cleaners' cupboards and any vans parked up. For each product, say whether it's here, where it's kept and the most you'd ever have on hand. Your answers are kept on this phone as you go. When you're done, tap <b>Send results</b> at the bottom.</div>
+  ${state.msg?`<div class="banner">${esc(state.msg)}</div>`:""}
+  <label class="f" for="checker">Your name<input id="checker" data-top="checker" value="${esc(c.checker)}" autocomplete="name"></label>
+  <div><div class="progress" aria-label="Progress"><span style="width:${pct}%"></span></div><p class="note">${done} of ${PRODUCTS.length} products checked</p></div>
+  ${PRODUCTS.map(renderCk).join("")}
+  <h2>Anything else on site?</h2>
+  <p class="note">Fuel, LPG cylinders, engine oil, coolant, brake fluid, paint, pest control, workshop chemicals. If it has a hazard label and it isn't above, add it here with a photo of the label.</p>
+  ${c.extras.map((e,k)=>`<div class="ck done"><div class="top"><b>${esc(e.name)}</b><button class="btn ghost" data-delextra="${k}">Remove</button></div><div class="note">${esc(e.location||"")}${e.qty?` · max ${esc(e.qty)}`:""}${e.notes?` · ${esc(e.notes)}`:""}</div>${e.photo&&photoUrl[e.photo]?`<img class="thumb" src="${photoUrl[e.photo]}" alt="Label photo for ${esc(e.name)}">`:""}</div>`).join("")}
+  <form class="ck" id="extraform">
+    <div class="fields">
+      <label class="f full" for="x-name">Product name on the label<input id="x-name" required></label>
+      <label class="f" for="x-loc">Where it's kept<input id="x-loc"></label>
+      <label class="f" for="x-qty">Most held at once<input id="x-qty" placeholder="e.g. 2 x 20 L"></label>
+      <label class="f full" for="x-notes">Notes<input id="x-notes"></label>
+      <label class="f full" for="x-photo">Photo of the label<input id="x-photo" type="file" accept="image/*" capture="environment"></label>
+    </div>
+    <div class="btnrow"><button class="btn" type="submit">Add to the check</button></div>
+  </form>
+  <h2>Storage checks</h2>
+  ${STORAGE_QS.map((q,k)=>{const v=c.storage["q"+k];return `<div class="qrow"><span>${esc(q)}</span><span class="seg">${["Yes","No"].map(o=>`<button data-sq="${k}" data-v="${o}" aria-pressed="${v===o}">${o}</button>`).join("")}</span></div>`}).join("")}
+  <label class="f" for="sq-notes">Anything that needs fixing<textarea id="sq-notes" data-top="notes" rows="3">${esc(c.notes)}</textarea></label>
+  <h2>Send results</h2>
+  ${done<PRODUCTS.length?`<p class="note">${PRODUCTS.length-done} products still need a "Here?" answer. You can send what you've got, but it's best to finish first.</p>`:`<p class="note">All ${PRODUCTS.length} products checked. Nice work.</p>`}
+  <div class="btnrow">
+    <button class="btn" id="send">Send results${countPhotos()?` and ${countPhotos()} photo${countPhotos()>1?"s":""}`:""}</button>
+    <button class="btn ghost" id="dl">Download results file</button>
+    <button class="btn ghost" id="copy">Copy results</button>
+  </div>
+  <p class="note" id="sendmsg">Send opens your phone's share menu, so you can email or message the results and label photos to Jon. ${c.finishedAt?`Last sent ${new Date(c.finishedAt).toLocaleString("en-NZ",{day:"numeric",month:"short",hour:"numeric",minute:"2-digit"})}.`:""}</p>
+  <details><summary class="note">Start again on this phone</summary><p class="note">Clears every answer and photo saved on this phone for ${esc(SITES[state.site].short)}. Only do this after you've sent your results.</p><button class="btn ghost" id="reset">Clear this phone's check</button></details>`;
+}
+
+function renderCk(p){
+  const i=ck().items[p.n]||{}, found=i.found;
+  const sig = p.signal==="DANGER"?'<span class="pill d">Danger</span>':"";
+  return `<section class="ck ${found==="yes"?"done":found?"no":""}" data-ck="${p.n}">
+    <div class="top"><b>${esc(p.name)}</b>${sig}</div>
+    <div class="qrow" style="padding:0;border:0"><span>Here?</span><span class="seg">${[["yes","Yes"],["no","No"],["unsure","Not sure"]].map(([k,l])=>`<button data-found="${k}" aria-pressed="${found===k}">${l}</button>`).join("")}</span></div>
+    ${found==="yes"||found==="unsure"?`<div class="fields">
+      <label class="f" for="loc-${p.n}">Where it's kept<input id="loc-${p.n}" data-field="location" value="${esc(i.location||"")}" placeholder="e.g. wash bay shelf"></label>
+      <label class="f" for="qty-${p.n}">Most held at once<input id="qty-${p.n}" data-field="maxQty" value="${esc(i.maxQty||"")}" placeholder="e.g. 2 x 20 L"></label>
+      <label class="f" for="lab-${p.n}">Label readable?<select id="lab-${p.n}" data-field="labelOk">${["","Yes","No"].map(o=>`<option ${i.labelOk===o?"selected":""}>${o}</option>`).join("")}</select></label>
+      <label class="f" for="sds-${p.n}">Printed SDS on site?<select id="sds-${p.n}" data-field="sdsOnSite">${["","Yes","No"].map(o=>`<option ${i.sdsOnSite===o?"selected":""}>${o}</option>`).join("")}</select></label>
+      ${p.askBrand?`<label class="f full" for="brand-${p.n}">Brand, product name and size on the label (we need to confirm this one)<input id="brand-${p.n}" data-field="brand" value="${esc(i.brand||"")}"></label>`:""}
+      <label class="f full" for="notes-${p.n}">Notes<input id="notes-${p.n}" data-field="notes" value="${esc(i.notes||"")}"></label>
+      <label class="f full" for="ph-${p.n}">${i.photo?"Replace label photo":"Photo of the label (optional)"}<input id="ph-${p.n}" type="file" accept="image/*" capture="environment" data-photo="${p.n}"></label>
+      ${i.photo&&photoUrl[i.photo]?`<img class="thumb full" src="${photoUrl[i.photo]}" alt="Label photo">`:""}
+    </div>`:""}
+  </section>`;
+}
+
+function countPhotos(){ const c=ck(); return Object.values(c.items).filter(i=>i.photo).length + c.extras.filter(e=>e.photo).length; }
+
+async function savePhoto(file, key){
+  let blob=file;
+  try{
+    const img=await createImageBitmap(file); const k=Math.min(1,1600/Math.max(img.width,img.height));
+    const cv=document.createElement("canvas"); cv.width=Math.round(img.width*k); cv.height=Math.round(img.height*k);
+    cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);
+    blob=await new Promise(r=>cv.toBlob(r,"image/jpeg",0.82)) || file;
+  }catch(e){}
+  photoMem[key]=blob; if(photoUrl[key]) URL.revokeObjectURL(photoUrl[key]); photoUrl[key]=URL.createObjectURL(blob);
+  await idbPut(key, blob);
+  return key;
+}
+async function loadThumbs(){
+  const c=ck(); if(!c) return;
+  const keys=[...Object.values(c.items).map(i=>i.photo), ...c.extras.map(e=>e.photo)].filter(Boolean);
+  let changed=false;
+  for(const k of keys){ if(photoUrl[k]) continue; const b=photoMem[k]||await idbGet(k); if(b){ photoMem[k]=b; photoUrl[k]=URL.createObjectURL(b); changed=true; } }
+  if(changed) render();
+}
+
+// ---------- results ----------
+const csvCell = v => { v=String(v??""); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; };
+function slug(s){ return String(s).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40); }
+function photoName(key){
+  const c=ck();
+  for(const [n,i] of Object.entries(c.items)) if(i.photo===key) return `${state.site}-${n}-${slug(short(+n))}.jpg`;
+  const e=c.extras.find(x=>x.photo===key); return `${state.site}-extra-${slug(e?e.name:"item")}.jpg`;
+}
+function buildCSV(){
+  const c=ck(), site=SITES[state.site].name, when=new Date().toLocaleDateString("en-NZ");
+  const rows=[["Site","Checked by","Date","#","Product","Here?","Where kept","Max held","Label readable","Printed SDS on site","Brand on label","Notes","Photo"]];
+  PRODUCTS.forEach(p=>{const i=c.items[p.n]||{}; rows.push([site,c.checker,when,p.n,p.name,i.found||"",i.location||"",i.maxQty||"",i.labelOk||"",i.sdsOnSite||"",i.brand||"",i.notes||"",i.photo?photoName(i.photo):""]);});
+  c.extras.forEach(e=>rows.push([site,c.checker,when,"extra",e.name,"yes",e.location||"",e.qty||"","","","",e.notes||"",e.photo?photoName(e.photo):""]));
+  STORAGE_QS.forEach((q,k)=>rows.push([site,c.checker,when,"storage",q,c.storage["q"+k]||"","","","","","","",""]));
+  if(c.notes) rows.push([site,c.checker,when,"notes","Anything that needs fixing","","","","","","",c.notes,""]);
+  return rows.map(r=>r.map(csvCell).join(",")).join("\n");
+}
+function buildText(){
+  const c=ck(), lab={yes:"Here",no:"Not here",unsure:"Not sure"};
+  const L=[`COSH site check: ${SITES[state.site].name}`,`Checked by: ${c.checker||"(name not given)"}`,`Date: ${new Date().toLocaleDateString("en-NZ",{day:"numeric",month:"long",year:"numeric"})}`,""];
+  PRODUCTS.forEach(p=>{const i=c.items[p.n]||{}; L.push(`${p.n}. ${short(p.n)}: ${lab[i.found]||"NOT CHECKED"}${i.location?` | ${i.location}`:""}${i.maxQty?` | max ${i.maxQty}`:""}${i.brand?` | label: ${i.brand}`:""}${i.labelOk==="No"?" | label not readable":""}${i.sdsOnSite==="No"?" | no printed SDS":""}${i.notes?` | ${i.notes}`:""}`);});
+  if(c.extras.length){ L.push("","Not on the register:"); c.extras.forEach(e=>L.push(`- ${e.name}${e.location?` | ${e.location}`:""}${e.qty?` | max ${e.qty}`:""}${e.notes?` | ${e.notes}`:""}`)); }
+  L.push("","Storage checks:"); STORAGE_QS.forEach((q,k)=>L.push(`- ${c.storage["q"+k]||"?"}: ${q}`));
+  if(c.notes) L.push("","Needs fixing: "+c.notes);
+  L.push("","Results file (CSV) attached or below:","",buildCSV());
+  return L.join("\n");
+}
+function csvFile(){ return new File([buildCSV()], `COSH-site-check-${state.site}-${new Date().toISOString().slice(0,10)}.csv`, {type:"text/csv"}); }
+function say(t){ const el=document.getElementById("sendmsg"); if(el) el.textContent=t; }
+function markSent(){ ck().finishedAt=new Date().toISOString(); persist(); }
+
+async function sendResults(){
+  const c=ck();
+  if(!c.checker){ say("Pop your name in at the top first, so Jon knows who did the check."); document.getElementById("checker").focus(); return; }
+  const files=[csvFile()];
+  for(const [n,i] of Object.entries(c.items)) if(i.photo){ const b=photoMem[i.photo]||await idbGet(i.photo); if(b) files.push(new File([b],photoName(i.photo),{type:"image/jpeg"})); }
+  for(const e of c.extras) if(e.photo){ const b=photoMem[e.photo]||await idbGet(e.photo); if(b) files.push(new File([b],photoName(e.photo),{type:"image/jpeg"})); }
+  const title=`COSH site check: ${SITES[state.site].name}`;
+  try{
+    if(navigator.canShare && navigator.canShare({files})){ await navigator.share({title,text:buildText(),files}); markSent(); say("Sent. Thanks! Jon will update the register from this."); return; }
+    if(navigator.share){ await navigator.share({title,text:buildText()}); markSent(); say("Sent without photos (this phone can't share files). Please send the label photos to Jon separately."); return; }
+  }catch(err){ if(err&&err.name==="AbortError"){ say("Not sent. Tap Send results again when you're ready."); return; } }
+  location.href=`mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(buildText())}`;
+  markSent(); say("Your email app should open with the results. Attach the label photos to that email if you took any.");
+}
+
+// ---------- events ----------
+document.addEventListener("click", async e=>{
+  const t=e.target.closest("[data-toggle],[data-filter],[data-found],[data-sq],[data-delextra],#send,#dl,#copy,#reset");
+  if(!t) return;
+  if(t.dataset.toggle){ const n=+t.dataset.toggle; state.open.has(n)?state.open.delete(n):state.open.add(n); render(); return; }
+  if(t.dataset.filter){ state.filter=t.dataset.filter; render(); return; }
+  if(t.dataset.found){ const n=+t.closest("[data-ck]").dataset.ck; const c=ck(); c.items[n]=Object.assign({},c.items[n],{found:t.dataset.found}); persist(); render(); return; }
+  if(t.dataset.sq){ ck().storage["q"+t.dataset.sq]=t.dataset.v; persist(); render(); return; }
+  if(t.dataset.delextra){ const c=ck(); const [x]=c.extras.splice(+t.dataset.delextra,1); if(x&&x.photo) idbDel(x.photo); persist(); render(); return; }
+  if(t.id==="send"){ sendResults(); return; }
+  if(t.id==="dl"){ const f=csvFile(), a=document.createElement("a"); a.href=URL.createObjectURL(f); a.download=f.name; document.body.appendChild(a); a.click(); a.remove(); say("Results file downloaded. Email it to Jon with any label photos."); return; }
+  if(t.id==="copy"){ try{ await navigator.clipboard.writeText(buildText()); say("Copied. Paste it into an email or message to Jon."); }catch(err){ say("Couldn't copy on this phone. Use Send results or Download instead."); } return; }
+  if(t.id==="reset"){ const c=ck(); [...Object.values(c.items).map(i=>i.photo),...c.extras.map(x=>x.photo)].filter(Boolean).forEach(k=>idbDel(k)); state.check[state.site]=blankCheck(); try{localStorage.removeItem("blc-check-"+state.site)}catch(err){} render(); }
+});
+document.addEventListener("input", e=>{ if(e.target.id==="q"){ state.q=e.target.value; state._refocus=true; render(); } });
+document.addEventListener("change", async e=>{
+  const el=e.target, c=ck && state.site ? ck() : null; if(!c) return;
+  if(el.dataset.field){ const n=+el.closest("[data-ck]").dataset.ck; c.items[n]=Object.assign({},c.items[n],{[el.dataset.field]:el.value.trim()}); persist(); }
+  if(el.dataset.top){ c[el.dataset.top]=el.value.trim(); persist(); }
+  if(el.dataset.photo && el.files[0]){ const n=+el.dataset.photo; const key=`${state.site}-p${n}-${Date.now()}`; const old=(c.items[n]||{}).photo; await savePhoto(el.files[0],key); if(old) idbDel(old); c.items[n]=Object.assign({},c.items[n],{photo:key}); persist(); render(); }
+});
+document.addEventListener("submit", async e=>{
+  if(e.target.id!=="extraform") return;
+  e.preventDefault();
+  const g=id=>document.getElementById(id), name=g("x-name").value.trim(); if(!name) return;
+  const x={name,location:g("x-loc").value.trim(),qty:g("x-qty").value.trim(),notes:g("x-notes").value.trim(),photo:null};
+  const f=g("x-photo").files[0]; if(f) x.photo=await savePhoto(f,`${state.site}-x-${Date.now()}`);
+  ck().extras.push(x); persist(); document.activeElement&&document.activeElement.blur(); render();
+});
+
+openIdb().then(()=>{ if(state.mode==="check") loadThumbs(); });
+route();
+
+</script>
+</body>
+</html>
